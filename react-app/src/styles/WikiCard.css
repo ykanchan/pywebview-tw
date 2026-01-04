@@ -1,0 +1,113 @@
+.wiki-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.wiki-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  border-color: var(--primary-color);
+}
+
+.wiki-card-header {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.wiki-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wiki-card-body {
+  padding: var(--spacing-lg);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.wiki-description {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  min-height: 2.5rem;
+}
+
+.wiki-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: auto;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.meta-icon {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+}
+
+.meta-item .label {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.meta-item .value {
+  color: var(--text-tertiary);
+}
+
+.wiki-card-footer {
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  gap: var(--spacing-sm);
+  background-color: var(--bg-secondary);
+}
+
+.wiki-card-footer .btn {
+  flex: 1;
+  font-size: 0.8125rem;
+  padding: 0.5rem 1rem;
+}
+
+.btn-open {
+  flex: 2;
+}
+
+.btn-delete {
+  flex: 1;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .wiki-card-footer {
+    flex-direction: column;
+  }
+
+  .wiki-card-footer .btn {
+    width: 100%;
+  }
+}
