@@ -1,0 +1,7 @@
+{
+	"title": "$:/plugins/ykanchan/TWikiAppPlugin",
+	"name": "TWikiAppPlugin",
+	"description": "Bridge between Tiddlywiki and backend PyWebView app",
+	"list": "readme",
+	"plugin-priority": 10
+}

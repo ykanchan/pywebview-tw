@@ -1,0 +1,20 @@
+#!/bin/bash
+
+user=admusr
+host=automate
+folder=pywebviewtest
+server=$user@$host
+
+# delete local and remote apk builds
+rm bin/*
+ssh $server rm $folder/bin/*
+
+# sync files
+rsync -avP . $server:~/$folder --exclude=".*" --exclude="build" --exclude="plans" --exclude="dist" --exclude="__pycache__" --exclude=".idea" --exclude="*.pyc" --exclude="remote-build" --exclude="Makefile" --exclude="plugin"  
+
+# run buildozer
+ssh $server /bin/sh -c "PATH=$PATH:~/.local/bin; cd $folder; source ~/.local/bin/activate; yes | ~/.local/bin/buildozer android debug" && \
+
+
+# copy built apk back
+rsync -avP $server:/home/$user/$folder/bin/ ./bin 
