@@ -25,7 +25,7 @@ def tree(src):
 
 
 APP = ["src/main.py"]
-DATA_FILES = tree("src/assets")
+DATA_FILES = tree("src/app") + tree("src/api") + tree("src/api")
 OPTIONS = {}
 
 setup(

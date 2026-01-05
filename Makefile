@@ -3,14 +3,18 @@
 # Build, install and show logs
 deploy: build-apk install logs
 
+clean:
+	rm -rf src/app/data/*
+	rm -rf src/app/assets/*
+	rm -rf src/app/index.html
 
 # Clean bin directory and build APK
-build-apk: build-tw  build-react
+build-apk: clean build-tw  build-react
 	rm -rf bin/*
 	@echo "Building APK..."
 	./remote-build
 
-build-mac: build-tw build-react
+build-mac: clean build-tw build-react
 	rm -rf dist/*
 	@echo "Building for macOS..."
 	python setup.py py2app 
@@ -34,7 +38,6 @@ build-tw:
 		--output ../src/app/data/ \
 		--render "$$:/core/save/all" \
 		base.html "text/plain"
-	cd src/app/data && cp base.html empty.html
 
 build-react:
 	cd react-app && npm run build

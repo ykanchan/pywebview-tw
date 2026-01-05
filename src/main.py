@@ -11,6 +11,55 @@ from api.wiki_manager import WikiManager
 from api.window_manager import WindowManager
 
 
+class WikiWindowAPI:
+    """API for individual wiki windows - each window gets its own instance."""
+
+    def __init__(self, wiki_id: str, wiki_path: str, wiki_manager: WikiManager):
+        """Initialize API for a specific wiki window.
+
+        Args:
+            wiki_id: UUID of the wiki
+            wiki_path: Path to the wiki file
+            wiki_manager: WikiManager instance for operations
+        """
+        self.wiki_id = wiki_id
+        self.wiki_path = wiki_path
+        self.wiki_manager = wiki_manager
+
+    def save(self, payload: dict) -> str:
+        """Save wiki content for this specific wiki.
+
+        Args:
+            payload: Dictionary with 'text' (HTML content)
+
+        Returns:
+            str: Success message
+        """
+        try:
+            print(f"[WikiWindowAPI] save called for wiki: {self.wiki_id}")
+
+            html_content = payload.get("text", "")
+            if not html_content:
+                raise ValueError("No content to save")
+
+            print(f"[WikiWindowAPI] Content length: {len(html_content)} bytes")
+            print(f"[WikiWindowAPI] Saving to: {self.wiki_path}")
+
+            # Write the content to the file
+            with open(self.wiki_path, "w", encoding="utf-8") as f:
+                f.write(html_content)
+
+            print(f"[WikiWindowAPI] Save successful")
+            return "Save successful"
+
+        except Exception as e:
+            print(f"[WikiWindowAPI] Error saving: {e}")
+            import traceback
+
+            traceback.print_exc()
+            raise
+
+
 class MultiWikiApp:
     """Main application class for multi-wiki TiddlyWiki manager."""
 
@@ -121,15 +170,22 @@ class MultiWikiApp:
             self.wiki_manager.update_last_opened(wiki_id)
 
             # Check if we're on Android (mobile)
-            # Python-for-Android has the jnius module available
-            is_mobile = False
-            try:
-                import jnius
+            # Use multiple detection methods for reliability:
+            # 1. Check sys.platform (Python-for-Android reports 'linux' but we check env vars)
+            # 2. Check for Android-specific environment variables set by Python-for-Android
+            is_android_env = (
+                os.environ.get("ANDROID_ARGUMENT") is not None
+                or os.environ.get("ANDROID_PRIVATE") is not None
+                or os.environ.get("ANDROID_ROOT") is not None
+            )
 
-                is_mobile = True
-                print(f"[API] Platform detection: jnius module found - Android/mobile")
-            except ImportError:
-                print(f"[API] Platform detection: jnius not found - desktop")
+            # sys.platform on Android is 'linux', but we need env vars to confirm it's Android
+            is_mobile = is_android_env
+
+            if is_mobile:
+                print(f"[API] Platform detection: Android detected (env vars present)")
+            else:
+                print(f"[API] Platform detection: Desktop platform")
                 print(f"[API] sys.platform = {sys.platform}")
 
             if is_mobile:
@@ -156,8 +212,15 @@ class MultiWikiApp:
                 print(
                     f"[API] Desktop platform, creating window for wiki: {wiki['name']}"
                 )
+                # Convert to absolute path for desktop
+                abs_wiki_path = wiki_path.resolve()
+                print(f"[API] Absolute wiki path: {abs_wiki_path}")
+
+                # Create a dedicated API instance for this wiki window
+                wiki_api = WikiWindowAPI(wiki_id, str(abs_wiki_path), self.wiki_manager)
+
                 self.window_manager.create_wiki_window(
-                    wiki_id, str(wiki_path), wiki["name"]
+                    wiki_id, str(abs_wiki_path), wiki["name"], js_api=wiki_api
                 )
                 print(f"[API] Opened wiki: {wiki['name']} (ID: {wiki_id})")
                 return {"status": "success", "wiki_id": wiki_id, "is_mobile": False}

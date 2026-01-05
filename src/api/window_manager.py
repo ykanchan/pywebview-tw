@@ -21,14 +21,15 @@ class WindowManager:
         self.main_window = window
 
     def create_wiki_window(
-        self, wiki_id: str, wiki_path: str, wiki_name: str
+        self, wiki_id: str, wiki_path: str, wiki_name: str, js_api=None
     ) -> webview.Window:
         """Create a new window for a wiki.
 
         Args:
             wiki_id: UUID of the wiki
-            wiki_path: File path to the wiki HTML file
+            wiki_path: File path to the wiki HTML file (should be absolute path)
             wiki_name: Display name for the wiki
+            js_api: Optional API object to expose to the wiki window
 
         Returns:
             webview.Window: The created window instance
@@ -43,13 +44,16 @@ class WindowManager:
                 # Window might be closed, remove from tracking
                 del self.wiki_windows[wiki_id]
 
-        # Create new window
+        # Create new window - use the path directly, PyWebView handles it
+        print(f"[WindowManager] Creating window for: {wiki_name}")
+        print(f"[WindowManager] Wiki path: {wiki_path}")
         window = webview.create_window(
             title=f"TiddlyWiki - {wiki_name}",
-            url=f"file://{wiki_path}",
+            url=wiki_path,  # PyWebView accepts file paths directly
             width=1200,
             height=800,
             resizable=True,
+            js_api=js_api,  # Expose API to this window
         )
 
         # Register closing event handler to remove window from tracking
@@ -62,6 +66,7 @@ class WindowManager:
         window.events.closing += on_closing
 
         self.wiki_windows[wiki_id] = window
+        print(f"[WindowManager] Window created and tracked for wiki: {wiki_name}")
         return window
 
     def close_wiki_window(self, wiki_id: str) -> bool:
