@@ -13,24 +13,45 @@ function App() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    loadWikis();
+    // Wait for PyWebView API to be fully ready before loading wikis
+    const waitForApi = () => {
+      if (window.pywebview && window.pywebview.api) {
+        // Check if list_wikis method is actually callable
+        try {
+          const apiType = typeof window.pywebview.api.list_wikis;
+          console.log('[React] PyWebView API found, list_wikis type:', apiType);
+          console.log('[React] API object:', window.pywebview.api);
+          
+          if (apiType === 'function') {
+            console.log('[React] list_wikis is ready, loading wikis...');
+            loadWikis();
+          } else {
+            console.log('[React] list_wikis not ready yet, waiting...');
+            setTimeout(waitForApi, 100);
+          }
+        } catch (e) {
+          console.log('[React] Error checking API:', e);
+          setTimeout(waitForApi, 100);
+        }
+      } else {
+        console.log('[React] Waiting for PyWebView API...');
+        setTimeout(waitForApi, 100);
+      }
+    };
+    waitForApi();
   }, []);
 
   const loadWikis = async () => {
+    console.log('[React] loadWikis called');
     setLoading(true);
     setError(null);
     try {
-      // Check if pywebview API is available
-      if (window.pywebview && window.pywebview.api) {
-        const wikiList = await window.pywebview.api.list_wikis();
-        setWikis(wikiList);
-      } else {
-        // Fallback for development/testing
-        console.warn('PyWebView API not available, using mock data');
-        setWikis([]);
-      }
+      // Call list_wikis directly - PyWebView Proxy doesn't enumerate methods properly
+      const wikiList = await window.pywebview.api.list_wikis();
+      console.log('[React] Received wiki list:', wikiList);
+      setWikis(wikiList);
     } catch (error) {
-      console.error('Failed to load wikis:', error);
+      console.error('[React] Failed to load wikis:', error);
       setError('Failed to load wikis. Please try again.');
     } finally {
       setLoading(false);
@@ -58,7 +79,15 @@ function App() {
     try {
       setError(null);
       if (window.pywebview && window.pywebview.api) {
-        await window.pywebview.api.open_wiki(wikiId);
+        const result = await window.pywebview.api.open_wiki(wikiId);
+        
+        // On mobile, navigate to the wiki URL
+        if (result.is_mobile && result.wiki_url) {
+          console.log('[React] Mobile platform, navigating to wiki:', result.wiki_url);
+          window.location.href = result.wiki_url;
+        } else {
+          console.log('[React] Desktop platform, wiki opened in new window');
+        }
       } else {
         console.warn('PyWebView API not available');
       }

@@ -52,6 +52,15 @@ class WindowManager:
             resizable=True,
         )
 
+        # Register closing event handler to remove window from tracking
+        def on_closing():
+            print(f"[WindowManager] Wiki window closing: {wiki_name} (ID: {wiki_id})")
+            if wiki_id in self.wiki_windows:
+                del self.wiki_windows[wiki_id]
+                print(f"[WindowManager] Removed wiki {wiki_id} from tracking")
+
+        window.events.closing += on_closing
+
         self.wiki_windows[wiki_id] = window
         return window
 

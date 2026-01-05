@@ -60,3 +60,7 @@ bin/
 
 # Logs
 *.log
+
+
+src/api/__pycache__/
+src/app/

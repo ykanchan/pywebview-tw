@@ -17,19 +17,37 @@ class WikiManager:
         Args:
             base_dir: Base directory path for the application
         """
-        self.base_dir = Path(base_dir)
-        self.data_dir = self.base_dir / "data"
-        self.wikis_dir = self.data_dir / "wikis"
-        self.metadata_file = self.data_dir / "wikis.json"
-        self.base_template = self.base_dir / "assets" / "base.html"
+        # Store paths as strings to avoid PyWebView serialization issues
+        base_path = Path(base_dir)
+        self._base_dir_str = str(base_path)
+        self._data_dir_str = str(base_path / "app" / "data")
+        self._wikis_dir_str = str(base_path / "app" / "data" / "wikis")
+        self._metadata_file_str = str(base_path / "app" / "data" / "wikis.json")
+        self._base_template_str = str(base_path / "app" / "data" / "base.html")
 
         # Ensure directories exist
-        self.wikis_dir.mkdir(parents=True, exist_ok=True)
+        Path(self._wikis_dir_str).mkdir(parents=True, exist_ok=True)
         self._initialize_metadata()
+
+    # Private methods to access paths as Path objects internally
+    def _get_base_dir(self):
+        return Path(self._base_dir_str)
+
+    def _get_data_dir(self):
+        return Path(self._data_dir_str)
+
+    def _get_wikis_dir(self):
+        return Path(self._wikis_dir_str)
+
+    def _get_metadata_file(self):
+        return Path(self._metadata_file_str)
+
+    def _get_base_template(self):
+        return Path(self._base_template_str)
 
     def _initialize_metadata(self):
         """Initialize metadata file if it doesn't exist."""
-        if not self.metadata_file.exists():
+        if not self._get_metadata_file().exists():
             initial_data = {
                 "wikis": [],
                 "settings": {"last_wiki_id": 0, "default_wiki": None},
@@ -43,7 +61,7 @@ class WikiManager:
             dict: Wiki metadata dictionary
         """
         try:
-            with open(self.metadata_file, "r", encoding="utf-8") as f:
+            with open(self._metadata_file_str, "r", encoding="utf-8") as f:
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             self._initialize_metadata()
@@ -55,7 +73,7 @@ class WikiManager:
         Args:
             data: Metadata dictionary to save
         """
-        with open(self.metadata_file, "w", encoding="utf-8") as f:
+        with open(self._metadata_file_str, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
     def _generate_unique_filename(self):
@@ -94,17 +112,20 @@ class WikiManager:
             FileNotFoundError: If base template doesn't exist
             Exception: If wiki creation fails
         """
-        if not self.base_template.exists():
-            raise FileNotFoundError(f"Base template not found: {self.base_template}")
+        base_template = self._get_base_template()
+        if not base_template.exists():
+            raise FileNotFoundError(f"Base template not found: {base_template}")
 
         # Generate unique wiki data
         wiki_id = str(uuid.uuid4())
         filename = self._generate_unique_filename()
-        wiki_path = self.wikis_dir / filename
+        wiki_path = self._get_wikis_dir() / filename
 
         try:
             # Copy base template to new wiki file
-            shutil.copy2(self.base_template, wiki_path)
+            # Use copy() instead of copy2() to avoid permission issues on Android
+            # copy2() tries to preserve metadata which Android doesn't support
+            shutil.copy(base_template, wiki_path)
 
             # Create wiki metadata
             wiki_data = {
@@ -160,7 +181,7 @@ class WikiManager:
 
         try:
             # Delete wiki file
-            wiki_path = self.wikis_dir / wiki_to_delete["filename"]
+            wiki_path = self._get_wikis_dir() / wiki_to_delete["filename"]
             if wiki_path.exists():
                 wiki_path.unlink()
 
@@ -183,7 +204,7 @@ class WikiManager:
 
         # Update file sizes
         for wiki in metadata["wikis"]:
-            wiki_path = self.wikis_dir / wiki["filename"]
+            wiki_path = self._get_wikis_dir() / wiki["filename"]
             wiki["file_size"] = self._get_file_size(wiki_path)
 
         # Save updated metadata
@@ -208,7 +229,7 @@ class WikiManager:
         for wiki in metadata["wikis"]:
             if wiki["id"] == wiki_id:
                 # Update file size
-                wiki_path = self.wikis_dir / wiki["filename"]
+                wiki_path = self._get_wikis_dir() / wiki["filename"]
                 wiki["file_size"] = self._get_file_size(wiki_path)
                 return wiki
 
@@ -227,7 +248,7 @@ class WikiManager:
             ValueError: If wiki not found
         """
         wiki = self.get_wiki(wiki_id)
-        return self.wikis_dir / wiki["filename"]
+        return self._get_wikis_dir() / wiki["filename"]
 
     def update_last_opened(self, wiki_id: str):
         """Update last opened timestamp for wiki.

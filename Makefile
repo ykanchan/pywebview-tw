@@ -1,16 +1,16 @@
 .PHONY: build install logs deploy build-tw
 
 # Build, install and show logs
-deploy: build-tw build-apk install logs
+deploy: build-apk install logs
 
 
 # Clean bin directory and build APK
-build-apk: 
+build-apk: build-tw  build-react
 	rm -rf bin/*
 	@echo "Building APK..."
 	./remote-build
 
-build-mac:
+build-mac: build-tw build-react
 	rm -rf dist/*
 	@echo "Building for macOS..."
 	python setup.py py2app 
@@ -31,7 +31,10 @@ build-tw:
 		+plugins/tiddlywiki/highlight \
 		+themes/tiddlywiki/vanilla \
 		+themes/tiddlywiki/snowwhite \
-		--output ../src/assets/ \
+		--output ../src/app/data/ \
 		--render "$$:/core/save/all" \
 		base.html "text/plain"
-	cd src/assets && cp base.html empty.html
+	cd src/app/data && cp base.html empty.html
+
+build-react:
+	cd react-app && npm run build

@@ -7,9 +7,9 @@ export default defineConfig({
     plugins: [react()],
     base: './',
     build: {
-        outDir: '../src/assets',
+        outDir: '../src/app',
         assetsDir: 'assets',
-        emptyOutDir: false, // Don't empty the entire assets directory
+        emptyOutDir: false, // Don't empty the app directory (preserves any other files)
         rollupOptions: {
             output: {
                 entryFileNames: 'assets/[name]-[hash].js',
