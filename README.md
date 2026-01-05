@@ -6,17 +6,32 @@ A multi-wiki TiddlyWiki management application with a modern React-based interfa
 
 - 📚 **Multi-Wiki Management**: Create, manage, and organize multiple TiddlyWiki instances
 - 🎨 **Modern UI**: Clean, responsive React-based interface
-- 🪟 **Multi-Window Support**: Open multiple wikis simultaneously (desktop platforms)
+- 🪟 **Multi-Window Support**: Open multiple wikis simultaneously in separate windows (desktop)
+- 📱 **Mobile Support**: Single-window navigation optimized for Android
 - 🔍 **Search & Filter**: Quickly find wikis by name or description
 - 💾 **Metadata Tracking**: Track creation dates, last opened times, and file sizes
-- 📱 **Cross-Platform**: Works on Windows, macOS, Linux, and Android
+- 🖥️ **Cross-Platform**: Works on Windows, macOS, Linux, and Android with platform-specific optimizations
 
 ## Architecture
 
 The application consists of two main components:
 
 1. **Python Backend** (`src/api/`): Handles wiki file management, metadata persistence, and window management
-2. **React Frontend** (`src/assets/react-app/`): Provides the user interface for wiki management
+2. **React Frontend** (`react-app/`): Provides the user interface for wiki management
+
+### Platform-Specific Behavior
+
+**Desktop (macOS, Windows, Linux)**:
+- Opens each wiki in a separate PyWebView window
+- Each window has its own dedicated API instance for independent save operations
+- Supports multiple wikis open simultaneously
+
+**Mobile (Android)**:
+- Uses single-window navigation to switch between wikis
+- Tracks the currently open wiki for save operations
+- Optimized for touch interaction and mobile performance
+
+**Platform Detection**: The application automatically detects the platform using Android-specific environment variables (`ANDROID_ARGUMENT`, `ANDROID_PRIVATE`, `ANDROID_ROOT`) for reliable identification.
 
 ### Project Structure
 
@@ -121,7 +136,9 @@ The new wiki will be created from the `base.html` template and appear in your wi
 
 ### Opening a Wiki
 
-Click the "Open" button on any wiki card. On desktop platforms, this opens the wiki in a new window. On mobile, it navigates to the wiki within the app.
+Click the "Open" button on any wiki card:
+- **Desktop**: Opens the wiki in a new, separate window
+- **Mobile**: Navigates to the wiki within the same app window
 
 ### Deleting a Wiki
 
@@ -227,18 +244,32 @@ Wikis are tracked in `src/data/wikis.json`:
 If you see this error when running the application:
 
 ```bash
-cd src/assets/react-app
+cd react-app
 npm install
 npm run build
 ```
 
 ### Wiki Not Opening
 
-Ensure the wiki file exists in `src/data/wikis/` and the metadata is correct in `wikis.json`.
+Ensure the wiki file exists in `src/app/data/wikis/` and the metadata is correct in `wikis.json`.
+
+### Multi-Window Not Working on Desktop
+
+If wikis are opening in the same window instead of separate windows on desktop:
+1. Check the console logs for platform detection messages
+2. Ensure Android-specific modules (like `jnius`) are not installed in your desktop Python environment
+3. The platform detection should show "Desktop platform" in the logs
 
 ### PyWebView API Not Available
 
 This typically happens during development. The API is only available when running through PyWebView, not in a regular browser.
+
+### Android Build Issues
+
+If you encounter issues building for Android:
+1. Ensure Buildozer is properly configured
+2. Check that all required Android SDK components are installed
+3. Review the `buildozer.spec` file for correct paths and permissions
 
 ## Contributing
 
@@ -250,11 +281,18 @@ This project uses TiddlyWiki, which is licensed under the BSD 3-Clause License.
 
 ## Version History
 
-### v2.0.0 (Current)
+### v2.0.1 (Current - 2026-01-05)
+- Fixed platform detection using Android environment variables
+- Improved multi-window support on desktop
+- Enhanced per-window API instances
+- Updated file path structure for better cross-platform compatibility
+
+### v2.0.0 (2026-01-04)
 - Complete rewrite with React frontend
 - Multi-wiki management system
 - Modern, responsive UI
 - Enhanced metadata tracking
+- Cross-platform support (desktop and Android)
 
 ### v1.0.0
 - Initial single-wiki implementation

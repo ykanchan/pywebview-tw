@@ -50,6 +50,20 @@ That's it! The TiddlyWiki Manager should now open in a window.
 3. **Add a description** (optional): Help identify your wiki later
 4. **Click "Create Wiki"**: Your new wiki will appear in the list
 5. **Open your wiki**: Click the "Open" button to start editing
+   - **Desktop**: Opens in a new, separate window
+   - **Mobile**: Navigates to the wiki within the app
+
+## Platform-Specific Features
+
+### Desktop (macOS, Windows, Linux)
+- ✅ Multiple wikis can be open simultaneously in separate windows
+- ✅ Each window operates independently with its own save functionality
+- ✅ Automatic platform detection
+
+### Mobile (Android)
+- ✅ Single-window navigation optimized for mobile
+- ✅ Touch-friendly interface
+- ✅ Efficient memory usage
 
 ## Troubleshooting
 
@@ -70,6 +84,19 @@ Make the script executable:
 ```bash
 chmod +x build.sh
 ```
+
+### Multi-window not working on desktop
+If wikis open in the same window instead of separate windows:
+1. Check console logs for "Platform detection: Desktop platform"
+2. Ensure no Android-specific Python modules are installed (like `jnius`)
+3. Restart the application
+
+### Android build issues
+For Android builds using Buildozer:
+```bash
+buildozer android debug
+```
+Check `buildozer.spec` for correct configuration.
 
 ## What's Next?
 

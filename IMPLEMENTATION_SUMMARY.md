@@ -35,7 +35,9 @@ Successfully implemented a complete multi-wiki TiddlyWiki management system with
 - PyWebView integration with js_api
 - Exposed Python methods to JavaScript
 - Error handling and validation
-- Platform detection support
+- Robust platform detection using Android environment variables
+- Per-window API instances for desktop multi-window support
+- Mobile single-window navigation support
 
 ### 2. React Frontend (Phase 2 - Complete)
 
@@ -150,8 +152,9 @@ All components have comprehensive CSS with:
 - File size (auto-updated)
 
 ✅ **Multi-Window Support**
-- Desktop: Opens wikis in separate windows
-- Mobile: Ready for single-window navigation (future enhancement)
+- Desktop: Opens wikis in separate windows with dedicated API instances
+- Mobile: Single-window navigation with current wiki tracking
+- Robust platform detection using Android environment variables
 
 ✅ **Error Handling**
 - Comprehensive error messages
@@ -219,15 +222,60 @@ Legend:
 ⚠️  Generated/created at runtime
 ```
 
+## Platform-Specific Implementation Details
+
+### Desktop Platforms (macOS, Windows, Linux)
+- **Multi-Window Support**: Each wiki opens in a separate PyWebView window
+- **Per-Window APIs**: Each window gets its own `WikiWindowAPI` instance for independent save operations
+- **Platform Detection**: Checks for absence of Android environment variables
+
+### Mobile Platform (Android)
+- **Single-Window Navigation**: Wikis open within the same window using URL navigation
+- **Current Wiki Tracking**: The app tracks which wiki is currently open for save operations
+- **Platform Detection**: Checks for Android-specific environment variables:
+  - `ANDROID_ARGUMENT` - Set by Python-for-Android
+  - `ANDROID_PRIVATE` - Set by Python-for-Android
+  - `ANDROID_ROOT` - Standard Android system variable
+
+### Platform Detection Implementation
+The application uses environment variable detection rather than module imports to reliably distinguish between Android and desktop platforms. This approach avoids false positives that can occur when Android-specific modules (like `jnius`) are installed in desktop Python environments.
+
+## Recent Fixes and Improvements
+
+### Platform Detection Fix (2026-01-05)
+**Issue**: Desktop multi-window functionality wasn't working because the `jnius` module was installed in the Mac Python environment, causing false Android detection.
+
+**Solution**: Changed platform detection from checking for `jnius` module import to checking for Android-specific environment variables. This provides reliable detection because these variables are only set by the Python-for-Android runtime.
+
+**Files Modified**:
+- [`src/main.py`](src/main.py:172) - Updated platform detection logic
+
+### File Path Structure Updates
+**Issue**: PyWebView's HTTP server and file access patterns differ between desktop and Android.
+
+**Solution**:
+- Moved wiki data inside `src/app/data/` structure for HTTP server compatibility
+- Updated all path handling to use string storage with private getters
+- Changed from `shutil.copy2()` to `shutil.copy()` for Android compatibility
+
+**Files Modified**:
+- [`src/api/wiki_manager.py`](src/api/wiki_manager.py) - Path handling and file operations
+- [`src/main.py`](src/main.py) - HTTP server root configuration
+
+### Per-Window API Implementation
+**Issue**: Desktop wikis need independent save functionality when multiple windows are open.
+
+**Solution**: Created `WikiWindowAPI` class that provides dedicated API instances for each wiki window, allowing independent save operations without conflicts.
+
+**Files Modified**:
+- [`src/main.py`](src/main.py:14) - Added `WikiWindowAPI` class
+- [`src/api/window_manager.py`](src/api/window_manager.py:26) - Added `js_api` parameter support
+
 ## Next Steps (Future Enhancements)
 
 The following features from the roadmap are ready for future implementation:
 
-### Phase 4: Mobile Compatibility (Not Yet Implemented)
-- Mobile-specific navigation patterns
-- Single-window wiki viewing on mobile
-- Touch gesture support
-- Android-specific optimizations
+### Phase 4: Advanced Features (Not Yet Implemented)
 
 ### Phase 5: Advanced Features (Not Yet Implemented)
 - Wiki import/export functionality
