@@ -64,3 +64,5 @@ bin/
 
 src/api/__pycache__/
 src/app/
+
+dummy/

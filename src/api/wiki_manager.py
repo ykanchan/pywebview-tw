@@ -185,6 +185,11 @@ class WikiManager:
             if wiki_path.exists():
                 wiki_path.unlink()
 
+            # Delete tiddlers SQLite database if it exists
+            tiddlers_db_path = self._get_wikis_dir() / f"{wiki_id}_tiddlers.db"
+            if tiddlers_db_path.exists():
+                tiddlers_db_path.unlink()
+
             # Remove from metadata
             metadata["wikis"].pop(wiki_index)
             self._save_metadata(metadata)

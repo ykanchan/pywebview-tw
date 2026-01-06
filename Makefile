@@ -43,5 +43,8 @@ build-tw:
 build-react:
 	cd react-app && npm run build
 
-run: clean build-tw build-react
+run-clean: clean build-tw build-react
+	python src/main.py
+
+run: build-tw build-react
 	python src/main.py
