@@ -316,6 +316,7 @@ def main():
         resizable=True,
         min_size=(800, 600),
         js_api=app,
+        text_select=True,
     )
 
     app.window_manager.set_main_window(window)

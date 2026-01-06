@@ -13,32 +13,20 @@ function App() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Wait for PyWebView API to be fully ready before loading wikis
-    const waitForApi = () => {
-      if (window.pywebview && window.pywebview.api) {
-        // Check if list_wikis method is actually callable
-        try {
-          const apiType = typeof window.pywebview.api.list_wikis;
-          console.log('[React] PyWebView API found, list_wikis type:', apiType);
-          console.log('[React] API object:', window.pywebview.api);
-          
-          if (apiType === 'function') {
-            console.log('[React] list_wikis is ready, loading wikis...');
-            loadWikis();
-          } else {
-            console.log('[React] list_wikis not ready yet, waiting...');
-            setTimeout(waitForApi, 100);
-          }
-        } catch (e) {
-          console.log('[React] Error checking API:', e);
-          setTimeout(waitForApi, 100);
-        }
-      } else {
-        console.log('[React] Waiting for PyWebView API...');
-        setTimeout(waitForApi, 100);
-      }
+    // Use pywebview event listener to wait for API to be ready
+    const handlePywebviewReady = () => {
+      console.log('[React] PyWebView ready event fired');
+      console.log('[React] API object:', window.pywebview.api);
+      loadWikis();
     };
-    waitForApi();
+
+    // Listen for the pywebviewready event
+    window.addEventListener('pywebviewready', handlePywebviewReady);
+
+    // Cleanup event listener on unmount
+    return () => {
+      window.removeEventListener('pywebviewready', handlePywebviewReady);
+    };
   }, []);
 
   const loadWikis = async () => {
