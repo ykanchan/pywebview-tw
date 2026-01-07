@@ -32,7 +32,6 @@ logs:
 build-tw:
 	cd plugin && tiddlywiki \
 		++./src/ \
-		+plugins/tiddlywiki/tiddlyweb \
 		+plugins/tiddlywiki/highlight \
 		+themes/tiddlywiki/vanilla \
 		+themes/tiddlywiki/snowwhite \
@@ -46,5 +45,5 @@ build-react:
 run-clean: clean build-tw build-react
 	python src/main.py
 
-run: build-tw build-react
+run:
 	python src/main.py

@@ -1,0 +1,5 @@
+title: $:/plugins/ykanchan/TWikiAppPlugin/language/en-GB/
+type: application/x-tiddler-dictionary
+
+Buttons/DownloadWiki/Caption: download wiki
+Buttons/DownloadWiki/Hint: Download this wiki as a standalone HTML file

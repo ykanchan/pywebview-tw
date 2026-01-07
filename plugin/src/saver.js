@@ -51,7 +51,7 @@ Information about this saver
 PyWebViewSaver.prototype.info = {
     name: "PyWebViewSaver",
     priority: 10000,
-    capabilities: ["save", "autosave", "download"]
+    capabilities: ["save", "autosave"]
 };
 
 /*

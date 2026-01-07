@@ -1,0 +1,15 @@
+caption: {{$:/language/Buttons/DownloadWiki/Caption}}
+description: {{$:/language/Buttons/DownloadWiki/Hint}}
+tags: $:/tags/PageControls
+title: $:/plugins/ykanchan/TWikiAppPlugin/ui/Buttons/download-wiki
+
+\whitespace trim
+<$button tooltip={{$:/language/Buttons/DownloadWiki/Hint}} aria-label={{$:/language/Buttons/DownloadWiki/Caption}} class=<<tv-config-toolbar-class>>>
+<$action-sendmessage $message="tm-download-file" $param="$:/plugins/ykanchan/TWikiAppPlugin/save/all-standalone" filename={{$:/config/SaveWikiButton/Filename}}/>
+<$list filter="[<tv-config-toolbar-icons>match[yes]]">
+{{$:/core/images/download-button}}
+</$list>
+<$list filter="[<tv-config-toolbar-text>match[yes]]">
+<span class="tc-btn-text"><$text text={{$:/language/Buttons/DownloadWiki/Caption}}/></span>
+</$list>
+</$button>

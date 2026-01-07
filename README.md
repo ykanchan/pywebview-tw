@@ -14,10 +14,11 @@ A multi-wiki TiddlyWiki management application with a modern React-based interfa
 
 ## Architecture
 
-The application consists of two main components:
+The application consists of three main components:
 
-1. **Python Backend** (`src/api/`): Handles wiki file management, metadata persistence, and window management
+1. **Python Backend** (`src/api/`): Handles wiki file management, metadata persistence, window management, and tiddler storage
 2. **React Frontend** (`react-app/`): Provides the user interface for wiki management
+3. **TiddlyWiki Sync Adaptor** (`plugin/src/`): JavaScript plugin for real-time tiddler synchronization via PyWebView bridge
 
 ### Platform-Specific Behavior
 
@@ -41,25 +42,44 @@ The application consists of two main components:
 │   ├── main.py                    # Application entry point
 │   ├── api/                       # Python backend
 │   │   ├── wiki_manager.py        # Wiki CRUD operations
-│   │   └── window_manager.py      # Multi-window management
+│   │   ├── window_manager.py      # Multi-window management
+│   │   └── tiddler_store.py       # SQLite tiddler storage
 │   ├── assets/
 │   │   ├── base.html              # TiddlyWiki template
 │   │   ├── index.html             # Built React app (after build)
 │   │   └── assets/                # Built React assets (CSS, JS)
 │   └── data/
 │       ├── wikis.json             # Wiki metadata
-│       └── wikis/                 # Wiki HTML files
+│       └── wikis/                 # Wiki HTML files and SQLite databases
 ├── react-app/                     # React frontend source
 │   ├── src/
 │   │   ├── App.jsx
 │   │   ├── components/
 │   │   └── styles/
 │   └── package.json
-├── plugin/                        # TiddlyWiki saver plugin
+├── plugin/                        # TiddlyWiki plugins
+│   └── src/
+│       ├── saver.js               # Full HTML export saver
+│       └── syncadaptor.js         # Real-time tiddler sync adaptor
 ├── plans/                         # Architecture documentation
 ├── build.sh                       # Build script (Unix/Mac)
 └── build.bat                      # Build script (Windows)
 ```
+
+### Storage Architecture
+
+Each wiki uses a **dual-storage approach**:
+
+1. **SQLite Database** (`{wiki_id}_tiddlers.db`): Primary storage for individual tiddlers
+   - Fast granular access to tiddlers
+   - Supports real-time synchronization
+   - Revision tracking for each tiddler
+   - Thread-safe operations
+
+2. **HTML File** (`{wiki_name}.html`): TiddlyWiki HTML with embedded plugin
+   - Used as the entry point for loading the wiki
+   - Can be exported with all tiddlers for portability (via saver plugin)
+   - Backward compatible with standard TiddlyWiki files
 
 ## Installation & Setup
 
@@ -70,6 +90,12 @@ The application consists of two main components:
 - npm
 
 ### Step 1: Install Python Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+or directly:
 
 ```bash
 pip install pywebview
@@ -281,7 +307,18 @@ This project uses TiddlyWiki, which is licensed under the BSD 3-Clause License.
 
 ## Version History
 
-### v2.0.1 (Current - 2026-01-05)
+### v2.1.0 (Current - 2026-01-06)
+- **Major Architecture Refactoring**: Removed Flask dependency
+- Implemented direct PyWebView bridge communication for tiddler operations
+- New SQLite-based tiddler storage via [`TiddlerStore`](src/api/tiddler_store.py) class
+- Added JavaScript sync adaptor ([`syncadaptor.js`](plugin/src/syncadaptor.js)) for real-time tiddler synchronization
+- Enhanced [`WikiWindowAPI`](src/main.py:14) with tiddler CRUD methods (get_status, get_skinny_tiddlers, get_tiddler, put_tiddler, delete_tiddler)
+- Simplified window management - HTML files loaded directly via PyWebView
+- Retained existing saver plugin for future full HTML export features
+- Improved performance by eliminating HTTP/Flask overhead
+- Dual-storage architecture: SQLite for fast access + HTML for portability
+
+### v2.0.1 (2026-01-05)
 - Fixed platform detection using Android environment variables
 - Improved multi-window support on desktop
 - Enhanced per-window API instances

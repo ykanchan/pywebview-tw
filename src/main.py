@@ -9,6 +9,7 @@ from pathlib import Path
 
 from api.wiki_manager import WikiManager
 from api.window_manager import WindowManager
+from api.tiddler_store import TiddlerStore
 
 
 class WikiWindowAPI:
@@ -26,8 +27,15 @@ class WikiWindowAPI:
         self.wiki_path = wiki_path
         self.wiki_manager = wiki_manager
 
+        # Initialize TiddlerStore for this wiki (private to avoid PyWebView serialization issues)
+        wiki_dir = Path(wiki_path).parent
+        self._tiddler_store = TiddlerStore(wiki_id, wiki_dir)
+        print(f"[WikiWindowAPI] Initialized TiddlerStore for wiki {wiki_id}")
+
     def save(self, payload: dict) -> str:
-        """Save wiki content for this specific wiki.
+        """Save wiki content for this specific wiki (full HTML save).
+
+        This is used by the saver plugin for full HTML exports.
 
         Args:
             payload: Dictionary with 'text' (HTML content)
@@ -49,11 +57,120 @@ class WikiWindowAPI:
             with open(self.wiki_path, "w", encoding="utf-8") as f:
                 f.write(html_content)
 
+            # Record the HTML save timestamp for smart first-sync
+            self._tiddler_store.record_html_save()
+
             print(f"[WikiWindowAPI] Save successful")
             return "Save successful"
 
         except Exception as e:
             print(f"[WikiWindowAPI] Error saving: {e}")
+            import traceback
+
+            traceback.print_exc()
+            raise
+
+    # Tiddler sync adaptor methods
+    def get_updated_tiddlers(
+        self, since_timestamp: str = None, current_tiddlers: list = None
+    ) -> dict:
+        """Get tiddlers that have been modified since a given timestamp.
+
+        This method is used by the sync adaptor for efficient synchronization.
+        It returns only the titles of tiddlers that have changed, not the full content.
+
+        Args:
+            since_timestamp: ISO format timestamp. If None, returns all tiddlers.
+            current_tiddlers: List of tiddler titles currently loaded in TiddlyWiki.
+                            Used for deletion detection.
+
+        Returns:
+            dict: {
+                'modifications': [list of tiddler titles],
+                'deletions': [list of deleted tiddler titles]
+            }
+        """
+        try:
+            result = self._tiddler_store.get_updated_tiddlers(
+                since_timestamp, current_tiddlers
+            )
+            return result
+        except Exception as e:
+            print(f"[WikiWindowAPI] Error getting updated tiddlers: {e}")
+            import traceback
+
+            traceback.print_exc()
+            raise
+
+    def get_tiddler(self, title: str) -> str:
+        """Get a complete tiddler by title.
+
+        Args:
+            title: Tiddler title
+
+        Returns:
+            str: Complete tiddler data as JSON string, or None if not found
+        """
+        try:
+            print(f"[WikiWindowAPI] get_tiddler called: {title}")
+            tiddler_json = self._tiddler_store.get_tiddler(title)
+            if tiddler_json:
+                print(f"[WikiWindowAPI] Found tiddler: {title}")
+            else:
+                print(f"[WikiWindowAPI] Tiddler not found: {title}")
+            return tiddler_json
+        except Exception as e:
+            print(f"[WikiWindowAPI] Error getting tiddler: {e}")
+            import traceback
+
+            traceback.print_exc()
+            raise
+
+    def put_tiddler(self, title: str, tiddler_json: str) -> dict:
+        """Create or update a tiddler.
+
+        Args:
+            title: Tiddler title
+            tiddler_json: Tiddler data as JSON string (from TiddlyWiki's getTiddlerAsJson)
+
+        Returns:
+            dict: Response indicating success
+        """
+        try:
+            print(f"[WikiWindowAPI] put_tiddler called: {title}")
+
+            # Store the tiddler - pass JSON string directly
+            result = self._tiddler_store.put_tiddler(title, tiddler_json)
+
+            return result
+        except Exception as e:
+            print(f"[WikiWindowAPI] Error putting tiddler: {e}")
+            import traceback
+
+            traceback.print_exc()
+            raise
+
+    def delete_tiddler(self, title: str) -> dict:
+        """Delete a tiddler.
+
+        Args:
+            title: Tiddler title
+
+        Returns:
+            dict: Response indicating success
+        """
+        try:
+            print(f"[WikiWindowAPI] delete_tiddler called: {title}")
+            deleted = self._tiddler_store.delete_tiddler(title)
+
+            if deleted:
+                print(f"[WikiWindowAPI] Deleted tiddler: {title}")
+            else:
+                print(f"[WikiWindowAPI] Tiddler not found (already deleted?): {title}")
+
+            return {"status": "success"}
+        except Exception as e:
+            print(f"[WikiWindowAPI] Error deleting tiddler: {e}")
             import traceback
 
             traceback.print_exc()
