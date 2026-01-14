@@ -327,6 +327,32 @@ class TiddlerStore:
 
         return deletions
 
+    def get_all_tiddlers_as_list(self) -> list:
+        """Get all tiddlers as a list of dictionaries for HTML injection.
+
+        Returns:
+            list: List of tiddler dictionaries (parsed from JSON)
+        """
+        with self.db_lock:
+            cursor = self.db_conn.cursor()
+            cursor.execute("SELECT tiddler_data FROM tiddlers")
+            rows = cursor.fetchall()
+
+            tiddlers = []
+            for row in rows:
+                try:
+                    # Parse the JSON string to a dictionary
+                    tiddler_dict = json.loads(row[0])
+                    tiddlers.append(tiddler_dict)
+                except json.JSONDecodeError as e:
+                    print(f"[TiddlerStore] Error parsing tiddler JSON: {e}")
+                    continue
+
+            print(
+                f"[TiddlerStore] Retrieved {len(tiddlers)} tiddlers for HTML injection"
+            )
+            return tiddlers
+
     def close(self):
         """Close the database connection."""
         if hasattr(self, "db_conn"):

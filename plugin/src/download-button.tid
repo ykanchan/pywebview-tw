@@ -1,7 +1,7 @@
 caption: {{$:/language/Buttons/DownloadWiki/Caption}}
 description: {{$:/language/Buttons/DownloadWiki/Hint}}
 tags: $:/tags/PageControls
-title: $:/plugins/ykanchan/TWikiAppPlugin/ui/Buttons/download-wiki
+title: $:/plugins/ykanchan/TWikiAppPlugin/button-download-wiki
 
 \whitespace trim
 <$button tooltip={{$:/language/Buttons/DownloadWiki/Hint}} aria-label={{$:/language/Buttons/DownloadWiki/Caption}} class=<<tv-config-toolbar-class>>>

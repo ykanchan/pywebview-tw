@@ -1,0 +1,10 @@
+title: $:/plugins/tiddlywiki/pywebview/suppress-boot
+type: text/vnd.tiddlywiki
+tags: $:/tags/RawMarkup
+
+<script>
+window.$tw = window.$tw || {};
+$tw.boot = $tw.boot || {};
+$tw.preloadTiddlers = $tw.preloadTiddlers || [];
+$tw.boot.suppressBoot = true;
+</script>

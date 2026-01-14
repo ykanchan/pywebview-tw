@@ -36,8 +36,11 @@ build-tw:
 		+themes/tiddlywiki/vanilla \
 		+themes/tiddlywiki/snowwhite \
 		--output ../src/app/data/ \
-		--render "$$:/core/save/all" \
-		base.html "text/plain"
+		--render "$$:/plugins/ykanchan/TWikiAppPlugin/save/empty-external-js" \
+		"[[base-]addsuffix<version>addsuffix[.html]]" "text/plain" \
+		--output ../src/app/assets/ \
+		"--render" "$$:/core/templates/tiddlywiki5.js" \
+        "[[tiddlywikicore-]addsuffix<version>addsuffix[.js]]" "text/plain"
 
 build-react:
 	cd react-app && npm run build

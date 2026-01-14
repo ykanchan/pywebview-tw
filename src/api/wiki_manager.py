@@ -23,7 +23,7 @@ class WikiManager:
         self._data_dir_str = str(base_path / "app" / "data")
         self._wikis_dir_str = str(base_path / "app" / "data" / "wikis")
         self._metadata_file_str = str(base_path / "app" / "data" / "wikis.json")
-        self._base_template_str = str(base_path / "app" / "data" / "base.html")
+        self._base_template_str = str(base_path / "app" / "data" / "base-5.3.8.html")
 
         # Ensure directories exist
         Path(self._wikis_dir_str).mkdir(parents=True, exist_ok=True)
@@ -150,6 +150,7 @@ class WikiManager:
             # Clean up on failure
             if wiki_path.exists():
                 wiki_path.unlink()
+            # Don't delete the shared core JS file on wiki creation failure
             raise Exception(f"Failed to create wiki: {str(e)}")
 
     def delete_wiki(self, wiki_id: str) -> bool:
@@ -184,6 +185,9 @@ class WikiManager:
             wiki_path = self._get_wikis_dir() / wiki_to_delete["filename"]
             if wiki_path.exists():
                 wiki_path.unlink()
+
+            # Don't delete the shared TiddlyWiki core JS file (tiddlywikicore-5.3.8.js)
+            # It's shared across all wikis
 
             # Delete tiddlers SQLite database if it exists
             tiddlers_db_path = self._get_wikis_dir() / f"{wiki_id}_tiddlers.db"

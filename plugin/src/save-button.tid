@@ -1,0 +1,21 @@
+title: $:/core/ui/Buttons/save-wiki
+tags: $:/tags/PageControls
+caption: {{$:/core/images/save-button-dynamic}} {{$:/language/Buttons/SaveWiki/Caption}}
+description: {{$:/language/Buttons/SaveWiki/Hint}}
+
+\whitespace trim
+<$button tooltip={{$:/language/Buttons/SaveWiki/Hint}} aria-label={{$:/language/Buttons/SaveWiki/Caption}} class=<<tv-config-toolbar-class>>>
+<$wikify name="site-title" text={{$:/config/SaveWikiButton/Filename}}>
+<$action-sendmessage $message="tm-save-wiki" $param={{$:/plugins/ykanchan/TWikiAppPlugin/SaveWikiButton/Template}} filename=<<site-title>>/>
+</$wikify>
+<span class="tc-dirty-indicator">
+<%if [<tv-config-toolbar-icons>match[yes]] %>
+{{$:/core/images/save-button-dynamic}}
+<%endif%>
+<%if [<tv-config-toolbar-text>match[yes]] %>
+<span class="tc-btn-text">
+<$text text={{$:/language/Buttons/SaveWiki/Caption}}/>
+</span>
+<%endif%>
+</span>
+</$button>
